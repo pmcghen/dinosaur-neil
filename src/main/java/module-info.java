@@ -3,6 +3,7 @@ module com.example.dinosaurneil {
 
     requires org.kordamp.bootstrapfx.core;
     requires org.jsoup;
+    requires javafx.web;
 
     exports com.example.dinosaurneil;
 }

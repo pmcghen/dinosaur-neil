@@ -4,13 +4,13 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import org.jsoup.Jsoup;
@@ -34,20 +34,42 @@ public class FeedReaderApplication extends Application {
         Label addFeedLabel = new Label("Add feed URL");
         TextField feedUrlTextField = new TextField();
         Button addFeedButton = new Button("Add");
+        ScrollPane sidebarContainer = new ScrollPane();
+        VBox sidebar = new VBox();
+        Accordion feedAccordion = new Accordion();
+        ScrollPane mainContainer = new ScrollPane();
+        VBox mainContent = new VBox();
+
+        pane.setPadding(new Insets(12));
 
         addFeedLabel.setFont(Font.font("Comfortaa", FontWeight.BOLD, 16));
 
         addFeedButton.setFont(Font.font("Comfortaa", 16));
         addFeedButton.getStyleClass().setAll("btn", "btn-primary");
 
-        headerTitle.setText("Dinosaur Neil RSS Reader");
+        headerTitle.setText("\uD83E\uDD96 Dinosaur Neil RSS Reader");
         headerTitle.setFont(Font.font("Comfortaa", FontWeight.BLACK, 24));
 
         topBar.getChildren().add(headerTitle);
-        topBar.setPadding(new Insets(12));
+        topBar.setPadding(new Insets(0, 0 , 12, 0));
+
+        sidebarContainer.setPrefViewportHeight(700);
+        sidebarContainer.setPrefViewportWidth(255);
+        sidebarContainer.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        sidebarContainer.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        sidebarContainer.setContent(sidebar);
+
+        mainContainer.setPrefViewportHeight(700);
+        mainContainer.setPrefViewportWidth(720);
+        mainContainer.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        mainContainer.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        mainContainer.setContent(mainContent);
+
+        sidebar.getChildren().add(feedAccordion);
+        sidebarContainer.getStyleClass().setAll("panel", "panel-primary");
 
         bottomBar.getChildren().addAll(addFeedLabel, feedUrlTextField, addFeedButton);
-        bottomBar.setPadding(new Insets(12));
+        bottomBar.setPadding(new Insets(12, 0, 0, 0));
         bottomBar.setAlignment(Pos.CENTER_LEFT);
 
         ArrayList<Feed> feeds = new ArrayList<>();
@@ -95,12 +117,53 @@ public class FeedReaderApplication extends Application {
                             Objects.requireNonNull(currentFeedItem.selectFirst("link")).text(),
                             Objects.requireNonNull(currentFeedItem.selectFirst("description")).text(),
                             Objects.requireNonNull(currentFeedItem.selectFirst("pubDate")).text());
-                    System.out.println(currentItem);
+
+                    feedItems.add(currentItem);
                     itemCount++;
                 }
             }
+
+            feedAccordion.getPanes().clear();
+
+            for (Feed feed : feeds) {
+                TitledPane feedPane = new TitledPane();
+                feedPane.setText(feed.getTitle());
+                VBox feedItemsContainer = new VBox();
+
+                for (FeedItem feedItem : feedItems) {
+                    if (feedItem.parentId == feed.id) {
+                        Button itemButton = new Button();
+                        itemButton.setText(feedItem.title);
+                        itemButton.getStyleClass().addAll("btn", "btn-default");
+                        itemButton.setPrefWidth(230);
+                        itemButton.setPadding(new Insets(0, 0, 0, 0));
+                        itemButton.setTextAlignment(TextAlignment.LEFT);
+
+                        itemButton.setOnAction((ev) -> {
+                            mainContent.getChildren().clear();
+
+                            TextArea feedContentText = new TextArea();
+                            feedContentText.setText(feedItem.description);
+                            feedContentText.setPrefWidth(710);
+                            feedContentText.setPrefHeight(645);
+                            feedContentText.setWrapText(true);
+                            feedContentText.setEditable(false);
+
+                            mainContent.getChildren().add(feedContentText);
+                        });
+
+                        feedItemsContainer.getChildren().add(itemButton);
+                    }
+                }
+
+                feedPane.setContent(feedItemsContainer);
+
+                feedAccordion.getPanes().add(feedPane);
+            }
         });
 
+        pane.setLeft(sidebarContainer);
+        pane.setCenter(mainContainer);
         pane.setTop(topBar);
         pane.setBottom(bottomBar);
 
