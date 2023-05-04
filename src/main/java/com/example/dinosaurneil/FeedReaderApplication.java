@@ -11,6 +11,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 import org.jsoup.Jsoup;
@@ -39,6 +41,9 @@ public class FeedReaderApplication extends Application {
         Accordion feedAccordion = new Accordion();
         ScrollPane mainContainer = new ScrollPane();
         VBox mainContent = new VBox();
+
+        WebView feedView = new WebView();
+        WebEngine feedEngine = feedView.getEngine();
 
         pane.setPadding(new Insets(12));
 
@@ -142,14 +147,10 @@ public class FeedReaderApplication extends Application {
                         itemButton.setOnAction((ev) -> {
                             mainContent.getChildren().clear();
 
-                            TextArea feedContentText = new TextArea();
-                            feedContentText.setText(feedItem.description);
-                            feedContentText.setPrefWidth(710);
-                            feedContentText.setPrefHeight(645);
-                            feedContentText.setWrapText(true);
-                            feedContentText.setEditable(false);
+                            feedEngine.loadContent(feedItem.description);
 
-                            mainContent.getChildren().add(feedContentText);
+                            feedView.setPrefWidth(720);
+                            feedView.setPrefHeight(645);
                         });
 
                         feedItemsContainer.getChildren().add(itemButton);
@@ -161,6 +162,8 @@ public class FeedReaderApplication extends Application {
                 feedAccordion.getPanes().add(feedPane);
             }
         });
+
+        mainContainer.setContent(feedView);
 
         pane.setLeft(sidebarContainer);
         pane.setCenter(mainContainer);
