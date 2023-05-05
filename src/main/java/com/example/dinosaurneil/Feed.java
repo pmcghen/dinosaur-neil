@@ -5,11 +5,11 @@ import com.example.dinosaurneil.util.StringToLocalDateTime;
 import java.time.LocalDateTime;
 
 public class Feed {
-    public int id;
-    public String title;
-    public String link;
-    public String description;
-    public LocalDateTime lastBuildDate;
+    private final int id;
+    private String title;
+    private String link;
+    private String description;
+    private final LocalDateTime lastBuildDate;
 
     public Feed(int id, String title, String link, String description, String lastBuildDate) {
         this.id = id;
@@ -29,6 +29,8 @@ public class Feed {
                 ", lastUpdate=" + lastBuildDate +
                 '}';
     }
+
+    public int getId() { return id; }
 
     public String getTitle() {
         return title;

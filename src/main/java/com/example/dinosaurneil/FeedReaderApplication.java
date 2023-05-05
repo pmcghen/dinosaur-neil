@@ -136,9 +136,9 @@ public class FeedReaderApplication extends Application {
                 VBox feedItemsContainer = new VBox();
 
                 for (FeedItem feedItem : feedItems) {
-                    if (feedItem.parentId == feed.id) {
+                    if (feedItem.getParentId() == feed.getId()) {
                         Button itemButton = new Button();
-                        itemButton.setText(feedItem.title);
+                        itemButton.setText(feedItem.getTitle());
                         itemButton.getStyleClass().addAll("btn", "btn-default");
                         itemButton.setPrefWidth(230);
                         itemButton.setPadding(new Insets(0, 0, 0, 0));
@@ -147,7 +147,7 @@ public class FeedReaderApplication extends Application {
                         itemButton.setOnAction((ev) -> {
                             mainContent.getChildren().clear();
 
-                            feedEngine.loadContent(feedItem.description);
+                            feedEngine.loadContent(feedItem.getDescription());
 
                             feedView.setPrefWidth(720);
                             feedView.setPrefHeight(645);
