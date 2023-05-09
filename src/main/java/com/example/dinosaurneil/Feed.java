@@ -1,22 +1,18 @@
 package com.example.dinosaurneil;
 
-import com.example.dinosaurneil.util.StringToLocalDateTime;
-
 import java.time.LocalDateTime;
 
 public class Feed {
-    private final int id;
+    private int id;
     private String title;
     private String link;
     private String description;
-    private final LocalDateTime lastBuildDate;
+    private LocalDateTime lastBuildDate;
 
-    public Feed(int id, String title, String link, String description, String lastBuildDate) {
-        this.id = id;
-        this.title = title;
-        this.link = link;
-        this.description = description;
-        this.lastBuildDate = StringToLocalDateTime.convertStringToDateTime(lastBuildDate);
+    public Feed() {
+       this.id = 0;
+       this.title = "Untitled";
+       this.lastBuildDate = LocalDateTime.now();
     }
 
     @Override
@@ -32,6 +28,10 @@ public class Feed {
 
     public int getId() { return id; }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -40,19 +40,15 @@ public class Feed {
         this.title = title;
     }
 
-    public String getLink() {
-        return link;
-    }
-
     public void setLink(String link) {
         this.link = link;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setLastBuildDate(LocalDateTime lastBuildDate) {
+        this.lastBuildDate = lastBuildDate;
     }
 }

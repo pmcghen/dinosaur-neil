@@ -1,7 +1,5 @@
 package com.example.dinosaurneil;
 
-import com.example.dinosaurneil.util.StringToLocalDateTime;
-
 import java.time.LocalDateTime;
 
 public class FeedItem {
@@ -13,21 +11,12 @@ public class FeedItem {
     private LocalDateTime pubDate;
     private String enclosure;
 
-    public FeedItem(int id, int parentId, String title, String link, String description, String pubDate) {
-        this.id = id;
-        this.parentId = parentId;
-        this.title = title;
-        this.link = link;
-        this.description = description;
-        this.pubDate = StringToLocalDateTime.convertStringToDateTime(pubDate);
-    }
-
-    public FeedItem(int id, int parentId, String title, String link, String description, String pubDate, String enclosure) {
-
-    }
-
-    public int getId() {
-        return id;
+    public FeedItem() {
+        this.id = 0;
+        this.parentId = 0;
+        this.title = "Untitled";
+        this.description = "";
+        this.pubDate = LocalDateTime.now();
     }
 
     public void setId(int id) {
@@ -50,10 +39,6 @@ public class FeedItem {
         this.title = title;
     }
 
-    public String getLink() {
-        return link;
-    }
-
     public void setLink(String link) {
         this.link = link;
     }
@@ -64,10 +49,6 @@ public class FeedItem {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public LocalDateTime getPubDate() {
-        return pubDate;
     }
 
     public void setPubDate(LocalDateTime pubDate) {
