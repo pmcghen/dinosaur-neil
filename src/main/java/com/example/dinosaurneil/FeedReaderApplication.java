@@ -111,6 +111,8 @@ public class FeedReaderApplication extends Application {
             }
 
             populateSidebar(feeds, feedItems, feedAccordion, mainContainer);
+
+            feedUrlTextField.clear();
         });
 
         pane.setLeft(sidebar);
