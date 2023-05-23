@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -57,62 +58,12 @@ public class FeedReaderApplication extends Application {
         ArrayList<Feed> feeds = new ArrayList<>();
         ArrayList<FeedItem> feedItems = new ArrayList<>();
 
-        addFeedButton.setOnAction((e) -> {
-            Document doc = null;
+        addFeedButton.setOnAction((e) -> addFeed(feeds, feedItems, feedAccordion, mainContainer, feedUrlTextField));
 
-            try {
-                doc = Jsoup.connect(feedUrlTextField.getText()).get();
-            } catch (IOException ex) {
-                System.err.println("\uD83D\uDEA9 Error! " + ex);
+        feedUrlTextField.setOnKeyPressed((e) -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                addFeed(feeds, feedItems, feedAccordion, mainContainer, feedUrlTextField);
             }
-
-            assert doc != null;
-            int feedCount = feeds.size() + 1;
-
-            Elements feedParent = doc.select("channel");
-            int itemCount = 1;
-
-            for (Element feed :
-                    feedParent) {
-                LocalDateTime lastBuildDate;
-
-                if (feed.selectFirst("lastBuildDate") == null) {
-                    lastBuildDate = LocalDateTime.now();
-                } else {
-                    lastBuildDate = StringToLocalDateTime.convertStringToDateTime(Objects.requireNonNull(feed.selectFirst("lastBuildDate")).text());
-                }
-
-                Feed currentFeed = new Feed();
-
-                currentFeed.setId(feedCount);
-                currentFeed.setTitle(Objects.requireNonNull(feed.selectFirst("title")).text());
-                currentFeed.setLink(Objects.requireNonNull(feed.selectFirst("link")).text());
-                currentFeed.setDescription(Objects.requireNonNull(feed.selectFirst("description")).text());
-                currentFeed.setLastBuildDate(lastBuildDate);
-
-                feeds.add(currentFeed);
-
-                Elements currentFeedItems = doc.getElementsByTag("item");
-
-                for (Element currentFeedItem :
-                        currentFeedItems) {
-                    FeedItem currentItem = new FeedItem();
-
-                    currentItem.setId(itemCount);
-                    currentItem.setParentId(feedCount);
-                    currentItem.setTitle(Objects.requireNonNull(currentFeedItem.selectFirst("title")).text());
-                    currentItem.setLink(Objects.requireNonNull(currentFeedItem.selectFirst("link")).text());
-                    currentItem.setDescription(Objects.requireNonNull(currentFeedItem.selectFirst("description")).text());
-                    currentItem.setPubDate(StringToLocalDateTime.convertStringToDateTime(Objects.requireNonNull(currentFeedItem.selectFirst("pubDate")).text()));
-
-                    feedItems.add(currentItem);
-                    itemCount++;
-                }
-            }
-
-            populateSidebar(feeds, feedItems, feedAccordion, mainContainer);
-
-            feedUrlTextField.clear();
         });
 
         pane.setLeft(sidebar);
@@ -164,6 +115,65 @@ public class FeedReaderApplication extends Application {
         mainContainer.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         return mainContainer;
+    }
+
+    private void addFeed(ArrayList<Feed> feeds, ArrayList<FeedItem> feedItems, Accordion feedAccordion, ScrollPane mainContainer, TextField feedUrlTextField) {
+        // TODO Break this method into smaller chunks
+        Document doc = null;
+
+        try {
+            doc = Jsoup.connect(feedUrlTextField.getText()).get();
+        } catch (IOException ex) {
+            System.err.println("\uD83D\uDEA9 Error! " + ex);
+        }
+
+        assert doc != null;
+        int feedCount = feeds.size() + 1;
+
+        Elements feedParent = doc.select("channel");
+        int itemCount = 1;
+
+        for (Element feed :
+                feedParent) {
+            LocalDateTime lastBuildDate;
+
+            if (feed.selectFirst("lastBuildDate") == null) {
+                lastBuildDate = LocalDateTime.now();
+            } else {
+                lastBuildDate = StringToLocalDateTime.convertStringToDateTime(Objects.requireNonNull(feed.selectFirst("lastBuildDate")).text());
+            }
+
+            Feed currentFeed = new Feed();
+
+            currentFeed.setId(feedCount);
+            currentFeed.setTitle(Objects.requireNonNull(feed.selectFirst("title")).text());
+            currentFeed.setLink(Objects.requireNonNull(feed.selectFirst("link")).text());
+            currentFeed.setDescription(Objects.requireNonNull(feed.selectFirst("description")).text());
+            currentFeed.setLastBuildDate(lastBuildDate);
+
+            feeds.add(currentFeed);
+
+            Elements currentFeedItems = doc.getElementsByTag("item");
+
+            for (Element currentFeedItem :
+                    currentFeedItems) {
+                FeedItem currentItem = new FeedItem();
+
+                currentItem.setId(itemCount);
+                currentItem.setParentId(feedCount);
+                currentItem.setTitle(Objects.requireNonNull(currentFeedItem.selectFirst("title")).text());
+                currentItem.setLink(Objects.requireNonNull(currentFeedItem.selectFirst("link")).text());
+                currentItem.setDescription(Objects.requireNonNull(currentFeedItem.selectFirst("description")).text());
+                currentItem.setPubDate(StringToLocalDateTime.convertStringToDateTime(Objects.requireNonNull(currentFeedItem.selectFirst("pubDate")).text()));
+
+                feedItems.add(currentItem);
+                itemCount++;
+            }
+        }
+
+        populateSidebar(feeds, feedItems, feedAccordion, mainContainer);
+
+        feedUrlTextField.clear();
     }
 
     private void populateSidebar(ArrayList<Feed> feeds, ArrayList<FeedItem> feedItems, Accordion feedAccordion, ScrollPane container) {
