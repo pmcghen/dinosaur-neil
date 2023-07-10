@@ -56,13 +56,12 @@ public class FeedReaderApplication extends Application {
         bottomBar.setAlignment(Pos.CENTER_LEFT);
 
         ArrayList<Feed> feeds = new ArrayList<>();
-        ArrayList<FeedItem> feedItems = new ArrayList<>();
 
-        addFeedButton.setOnAction((e) -> addFeed(feeds, feedItems, feedAccordion, mainContainer, feedUrlTextField));
+        addFeedButton.setOnAction((e) -> addFeed(feeds, feedAccordion, mainContainer, feedUrlTextField.getText()));
 
         feedUrlTextField.setOnKeyPressed((e) -> {
             if (e.getCode() == KeyCode.ENTER) {
-                addFeed(feeds, feedItems, feedAccordion, mainContainer, feedUrlTextField);
+                addFeed(feeds, feedAccordion, mainContainer, feedUrlTextField.getText());
             }
         });
 
@@ -117,12 +116,12 @@ public class FeedReaderApplication extends Application {
         return mainContainer;
     }
 
-    private void addFeed(ArrayList<Feed> feeds, ArrayList<FeedItem> feedItems, Accordion feedAccordion, ScrollPane mainContainer, TextField feedUrlTextField) {
+    private void addFeed(ArrayList<Feed> feeds, Accordion feedAccordion, ScrollPane mainContainer, String url) {
         // TODO Break this method into smaller chunks
         Document doc = null;
 
         try {
-            doc = Jsoup.connect(feedUrlTextField.getText()).get();
+            doc = Jsoup.connect(url).get();
         } catch (IOException ex) {
             System.err.println("\uD83D\uDEA9 Error! " + ex);
         }
@@ -131,7 +130,6 @@ public class FeedReaderApplication extends Application {
         int feedCount = feeds.size() + 1;
 
         Elements feedParent = doc.select("channel");
-        int itemCount = 1;
 
         for (Element feed :
                 feedParent) {
@@ -152,28 +150,34 @@ public class FeedReaderApplication extends Application {
             currentFeed.setLastBuildDate(lastBuildDate);
 
             feeds.add(currentFeed);
-
-            Elements currentFeedItems = doc.getElementsByTag("item");
-
-            for (Element currentFeedItem :
-                    currentFeedItems) {
-                FeedItem currentItem = new FeedItem();
-
-                currentItem.setId(itemCount);
-                currentItem.setParentId(feedCount);
-                currentItem.setTitle(Objects.requireNonNull(currentFeedItem.selectFirst("title")).text());
-                currentItem.setLink(Objects.requireNonNull(currentFeedItem.selectFirst("link")).text());
-                currentItem.setDescription(Objects.requireNonNull(currentFeedItem.selectFirst("description")).text());
-                currentItem.setPubDate(StringToLocalDateTime.convertStringToDateTime(Objects.requireNonNull(currentFeedItem.selectFirst("pubDate")).text()));
-
-                feedItems.add(currentItem);
-                itemCount++;
-            }
         }
 
+        ArrayList<FeedItem> feedItems = populateFeedItems(doc, feedCount);
         populateSidebar(feeds, feedItems, feedAccordion, mainContainer);
+    }
 
-        feedUrlTextField.clear();
+    private ArrayList<FeedItem> populateFeedItems(Document feed, int feedId) {
+        int itemCount = 1;
+        ArrayList<FeedItem> feedItems = new ArrayList<>();
+
+        Elements currentFeedItems = feed.getElementsByTag("item");
+
+        for (Element currentFeedItem :
+                currentFeedItems) {
+            FeedItem currentItem = new FeedItem();
+
+            currentItem.setId(itemCount);
+            currentItem.setParentId(feedId);
+            currentItem.setTitle(Objects.requireNonNull(currentFeedItem.selectFirst("title")).text());
+            currentItem.setLink(Objects.requireNonNull(currentFeedItem.selectFirst("link")).text());
+            currentItem.setDescription(Objects.requireNonNull(currentFeedItem.selectFirst("description")).text());
+            currentItem.setPubDate(StringToLocalDateTime.convertStringToDateTime(Objects.requireNonNull(currentFeedItem.selectFirst("pubDate")).text()));
+
+            feedItems.add(currentItem);
+            itemCount++;
+        }
+
+        return feedItems;
     }
 
     private void populateSidebar(ArrayList<Feed> feeds, ArrayList<FeedItem> feedItems, Accordion feedAccordion, ScrollPane container) {
